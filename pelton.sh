@@ -33,7 +33,7 @@ function provision() {
 
     NEW_HASH=$(\
             sha256sum /usr/local/lib/pelton/package-lock.json | cut -d' ' -f1)
-    OLD_HASH=$(cat /etc/pelton/build-hash 2>/dev/null)
+    OLD_HASH=$(cat /etc/pelton/build-hash 2>/dev/null || echo nil)
 
     if [[ "$NEW_HASH" != "$OLD_HASH" ]]; then
         cd /usr/local/lib/pelton
