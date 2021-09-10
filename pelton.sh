@@ -31,6 +31,16 @@ function provision() {
         git clone https://github.com/hamptonsmith/pelton.git
     fi
 
+    NEW_HASH=$(\
+            sha256sum /usr/local/lib/pelton/package-lock.json | cut -d' ' -f1)
+    OLD_HASH=$(cat /etc/pelton/build-hash 2>/dev/null)
+
+    if [[ "$NEW_HASH" !== "$OLD_HAS" ]]; then
+        cd /usr/local/lib/pelton
+        npm ci
+        echo "$NEW_HASH" > /etc/pelton/build-hash
+    fi
+
     if ! which pelton &> /dev/null; then
         ln -s /usr/local/lib/pelton/app.js /usr/bin/pelton
     fi
