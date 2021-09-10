@@ -35,7 +35,7 @@ function provision() {
             sha256sum /usr/local/lib/pelton/package-lock.json | cut -d' ' -f1)
     OLD_HASH=$(cat /etc/pelton/build-hash 2>/dev/null)
 
-    if [[ "$NEW_HASH" !== "$OLD_HAS" ]]; then
+    if [[ "$NEW_HASH" != "$OLD_HAS" ]]; then
         cd /usr/local/lib/pelton
         npm ci
         echo "$NEW_HASH" > /etc/pelton/build-hash
