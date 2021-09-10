@@ -38,6 +38,8 @@ function provision() {
     if [[ "$NEW_HASH" != "$OLD_HASH" ]]; then
         cd /usr/local/lib/pelton
         npm ci
+
+        mkdir -p /etc/pelton
         echo "$NEW_HASH" > /etc/pelton/build-hash
     fi
 
