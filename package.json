@@ -1,0 +1,23 @@
+{
+  "name": "@shieldsbetter/pelton",
+  "version": "0.0.1",
+  "description": "Dev environment management.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "pelton": "./app.js"
+  },
+  "author": "Hampton Smith",
+  "license": "ISC",
+  "dependencies": {
+    "@shieldsbetter/sberror2": "^0.0.1",
+    "bs58": "^4.0.1",
+    "envfile": "^6.17.0",
+    "get-port": "^5.1.1",
+    "shell-quote": "^1.7.2",
+    "tmp": "^0.2.1",
+    "yargs": "^17.1.1"
+  }
+}

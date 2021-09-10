@@ -1,0 +1,28 @@
+{
+  "name": "@shieldsbetter/sberror2",
+  "version": "0.0.1",
+  "description": "Javascript errors to my particular sensibilities.",
+  "main": "index.js",
+  "dependencies": {
+    "camel-case": "^4.1.1",
+    "constant-case": "^3.0.3",
+    "mustache": "^4.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node tests.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hamptonsmith/sberror2.git"
+  },
+  "keywords": [
+    "errors"
+  ],
+  "author": "Hampton Smith",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hamptonsmith/sberror2/issues"
+  },
+  "homepage": "https://github.com/hamptonsmith/sberror2#readme"
+}
