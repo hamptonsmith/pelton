@@ -21,8 +21,8 @@ module.exports = {
     },
 
     SpawnedProcessError,
-    spawnedProcessError(command, message) {
-        return new SpawnedProcessError({ command, message });
+    spawnedProcessError(command, message, cause) {
+        return new SpawnedProcessError({ command, message }, cause);
     },
 
     UnexpectedError,
