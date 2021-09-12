@@ -23,7 +23,7 @@ module.exports = {
     SpawnedProcessError,
     spawnedProcessError(command, message) {
         return new SpawnedProcessError({ command, message });
-    }
+    },
 
     UnexpectedError,
     unexpectedError(e) {
