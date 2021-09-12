@@ -63,7 +63,10 @@ module.exports = class PeltonProject {
                 process.removeListener('SIGINT', sigintForwarder);
 
                 if (code !== null && code !== 0) {
-                    reject(new Error(stderr));
+                    reject(new errors.SpawnedProcessError({
+                        command: cmdArray.join(' '),
+                        message: stderr
+                    });
                 }
                 else {
                     resolve();
@@ -78,7 +81,10 @@ module.exports = class PeltonProject {
 
                 process.removeListener('SIGINT', sigintForwarder);
 
-                reject(err);
+                reject(new errors.SpawnedProcessError(e, {
+                    command: cmdArray.join(' '),
+                    message: e.message
+                });
             });
         });
     }

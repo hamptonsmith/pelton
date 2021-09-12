@@ -10,11 +10,20 @@ class UnexpectedError extends SbError {
     static messageTemplate = 'Unexpected error: {{message}}';
 }
 
+class SpawnedProcessError extends SbError {
+    static messageTemplate = 'Error running `{{command}}`: {{message}}';
+}
+
 module.exports = {
     NoSuchFile,
     noSuchFile(path) {
         return new NoSuchFile({ path });
     },
+
+    SpawnedProcessError,
+    spawnedProcessError(command, message) {
+        return new SpawnedProcessError({ command, message });
+    }
 
     UnexpectedError,
     unexpectedError(e) {
