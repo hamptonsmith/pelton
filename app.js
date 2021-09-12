@@ -26,6 +26,7 @@ Promise.resolve(yargs(hideBin(process.argv))
     .help()
     .fail((msg, e) => {
         if (e instanceof errors.IncompatibleProject) {
+            console.log();
             console.log('This project is not configured to support this '
                     + 'operation:');
             console.log();
