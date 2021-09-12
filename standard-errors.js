@@ -3,19 +3,19 @@
 const SbError = require('@shieldsbetter/sberror2');
 
 class IncompatibleProject extends SbError {
-    static messageTemplate = '{{reason}}';
+    static messageTemplate = '{{{reason}}}';
 }
 
 class NoSuchFile extends SbError {
-    static messageTemplate = 'No such file: {{path}}';
+    static messageTemplate = 'No such file: {{{path}}}';
 }
 
 class SpawnedProcessError extends SbError {
-    static messageTemplate = 'Error running `{{command}}`: {{message}}';
+    static messageTemplate = 'Error running `{{{command}}}`: {{{message}}}';
 }
 
 class UnexpectedError extends SbError {
-    static messageTemplate = 'Unexpected error: {{message}}';
+    static messageTemplate = 'Unexpected error: {{{message}}}';
 }
 
 module.exports = {
