@@ -81,7 +81,7 @@ module.exports = class PeltonProject {
 
                 process.removeListener('SIGINT', sigintForwarder);
 
-                reject(new errors.SpawnedProcessError(e, {
+                reject(new errors.SpawnedProcessError(err, {
                     command: cmdArray.join(' '),
                     message: e.message
                 }));
