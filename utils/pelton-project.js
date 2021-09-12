@@ -48,41 +48,44 @@ module.exports = class PeltonProject {
             });
         }
 
-        await new Promise((resolve, reject) => {
-            // https://nodejs.org/api/child_process.html#child_process_event_error
-            // "When listening to both the 'exit' and 'error' events, guard
-            //  against accidentally invoking handler functions multiple times."
-            let returned;
+        try {
+            await new Promise((resolve, reject) => {
+                // https://nodejs.org/api/child_process.html#child_process_event_error
+                // "When listening to both the 'exit' and 'error' events, guard
+                //  against accidentally invoking handler functions multiple times."
+                let returned;
 
-            childProcess.on('exit', (code, signal) => {
-                if (returned) {
-                    return;
-                }
-                returned = true;
+                childProcess.on('exit', (code, signal) => {
+                    if (returned) {
+                        return;
+                    }
+                    returned = true;
 
-                process.removeListener('SIGINT', sigintForwarder);
+                    process.removeListener('SIGINT', sigintForwarder);
 
-                if (code !== null && code !== 0) {
-                    reject(errors.spawnedProcessError(
-                            cmdArray.join(' '), stderr));
-                }
-                else {
-                    resolve();
-                }
+                    if (code !== null && code !== 0) {
+                        reject(new Error(stderr));
+                    }
+                    else {
+                        resolve();
+                    }
+                });
+
+                childProcess.on('error', err => {
+                    if (returned) {
+                        return;
+                    }
+                    returned = true;
+
+                    process.removeListener('SIGINT', sigintForwarder);
+
+                    reject(err);
+                });
             });
-
-            childProcess.on('error', err => {
-                if (returned) {
-                    return;
-                }
-                returned = true;
-
-                process.removeListener('SIGINT', sigintForwarder);
-
-                reject(errors.spawnedProcessError(
-                    cmdArray.join(' '), err.message, err));
-            });
-        });
+        }
+        catch (e) {
+            throw errors.spawnedProcessError(e, cmdArray.join(' '), e.message);
+        }
     }
 
     async getEnv() {
