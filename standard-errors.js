@@ -2,19 +2,28 @@
 
 const SbError = require('@shieldsbetter/sberror2');
 
-class NoSuchFile extends SbError {
-    static messageTemplate = 'No such file: {{path}}';
+class IncompatibleProject extends SbError {
+    static messageTemplate = '{{reason}}';
 }
 
-class UnexpectedError extends SbError {
-    static messageTemplate = 'Unexpected error: {{message}}';
+class NoSuchFile extends SbError {
+    static messageTemplate = 'No such file: {{path}}';
 }
 
 class SpawnedProcessError extends SbError {
     static messageTemplate = 'Error running `{{command}}`: {{message}}';
 }
 
+class UnexpectedError extends SbError {
+    static messageTemplate = 'Unexpected error: {{message}}';
+}
+
 module.exports = {
+    IncompatibleProject,
+    incompatibleProject(reason) {
+        return new IncompatibleProject({ reason });
+    },
+
     NoSuchFile,
     noSuchFile(path) {
         return new NoSuchFile({ path });

@@ -59,10 +59,21 @@ exports.handler = async (argv) => {
         env.PELTON_DOCKER_SUDO = '--docker-sudo';
     }
 
-    await project.exec(`./.pelton/hermetic-start "${argv.reason}"`, {
-        env,
-        stdio: 'inherit'
-    });
+    try {
+        await project.exec(`./.pelton/hermetic-start "${argv.reason}"`, {
+            env,
+            stdio: 'inherit'
+        });
+    }
+    catch (e) {
+        if (!(e instanceof errors.SpawnedProcessError)
+                || e.cause.code !== 'ENOENT') {
+            throw errors.unexpectedError(e);
+        }
+
+        throw errors.incompatibleProject(
+                'No `hermetic-start` binary in <project root>/.pelton.');
+    }
 };
 
 function toShortIsolationKey(longIsolationKey) {

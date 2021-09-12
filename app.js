@@ -2,6 +2,7 @@
 
 'use strict';
 
+const errors = require('./standard-errors');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 
@@ -24,17 +25,26 @@ Promise.resolve(yargs(hideBin(process.argv))
     })
     .help()
     .fail((msg, e) => {
-        if (msg) {
-            console.log(msg);
+        if (e instanceof errors.IncompatibleProject) {
+            console.log('This project is not configured to support this '
+                    + 'operation:');
+            console.log();
+            console.log(e.message);
+            console.log();
         }
+        else {
+            if (msg) {
+                console.log(msg);
+            }
 
-        if (e) {
-            console.log(e);
+            if (e) {
+                console.log(e);
 
-            e = e.cause;
-            while (e) {
-                console.log('\nCaused by:', e);
                 e = e.cause;
+                while (e) {
+                    console.log('\nCaused by:', e);
+                    e = e.cause;
+                }
             }
         }
 
