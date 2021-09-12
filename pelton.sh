@@ -25,6 +25,7 @@ function provision() {
 
     if [[ -d /usr/local/lib/pelton ]]; then
         cd /usr/local/lib/pelton
+        git reset --hard HEAD
         git pull
     else
         cd /usr/local/lib
