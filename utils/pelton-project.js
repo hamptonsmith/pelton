@@ -66,7 +66,7 @@ module.exports = class PeltonProject {
                     reject(new errors.SpawnedProcessError({
                         command: cmdArray.join(' '),
                         message: stderr
-                    });
+                    }));
                 }
                 else {
                     resolve();
@@ -84,7 +84,7 @@ module.exports = class PeltonProject {
                 reject(new errors.SpawnedProcessError(e, {
                     command: cmdArray.join(' '),
                     message: e.message
-                });
+                }));
             });
         });
     }
