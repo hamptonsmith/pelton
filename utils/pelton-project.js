@@ -83,7 +83,7 @@ module.exports = class PeltonProject {
 
                 reject(new errors.SpawnedProcessError(err, {
                     command: cmdArray.join(' '),
-                    message: e.message
+                    message: err.message
                 }));
             });
         });
