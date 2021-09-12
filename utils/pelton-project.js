@@ -63,7 +63,7 @@ module.exports = class PeltonProject {
                 process.removeListener('SIGINT', sigintForwarder);
 
                 if (code !== null && code !== 0) {
-                    reject(new errors.SpawnedProcessError({
+                    reject(errors.SpawnedProcessError({
                         command: cmdArray.join(' '),
                         message: stderr
                     }));
@@ -81,7 +81,7 @@ module.exports = class PeltonProject {
 
                 process.removeListener('SIGINT', sigintForwarder);
 
-                reject(new errors.SpawnedProcessError(err, {
+                reject(errors.SpawnedProcessError(err, {
                     command: cmdArray.join(' '),
                     message: err.message
                 }));
