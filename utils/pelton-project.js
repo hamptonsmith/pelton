@@ -113,7 +113,7 @@ module.exports = class PeltonProject {
             }
 
             if (defaultContents === undefined) {
-                throw erros.noSuchFile(fullFilename);
+                throw errors.noSuchFile(fullFilename);
             }
 
             contents = defaultContents;
