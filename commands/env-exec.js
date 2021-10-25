@@ -42,6 +42,7 @@ exports.handler = async (argv) => {
     }
 
     const maybeSudo = argv.dockerSudo ? ['sudo', '-E'] : [];
+    const maybeNoTty = process.stdin.isTTY ? [] : ['-T'];
 
     const nextDockerFile = new TemporaryFile();
     await nextDockerFile.put(curDockerCompose);
@@ -50,6 +51,6 @@ exports.handler = async (argv) => {
         'docker-compose',
         '--project-name', projectName,
         '--file', nextDockerFile.filename,
-        'exec', argv.serviceName, ...shellParse(argv.command)
+        'exec', ...maybeNoTty, argv.serviceName, ...shellParse(argv.command)
     ], { stdio: 'inherit' });
 };
