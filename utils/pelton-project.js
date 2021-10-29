@@ -3,6 +3,7 @@
 const childProcessLib = require('child_process');
 const envfile = require('envfile');
 const errors = require('../standard-errors');
+const fs = require('fs');
 const fsUtils = require('./fs-utils');
 const pathLib = require('path');
 const shellParse = require('shell-quote').parse;
@@ -11,6 +12,26 @@ const TemporaryFile = require('./temporary-file');
 module.exports = class PeltonProject {
     constructor(projectDir) {
         this.projectDir = projectDir;
+    }
+
+    async configFileExists(...filenameParts) {
+        const configPath = this.getConfigPath(...filenameParts);
+
+        let result;
+
+        try {
+            await fs.promises.access(configPath, fs.constants.F_OK);
+            result = true;
+        }
+        catch (e) {
+            if (e.code !== 'ENOENT') {
+                throw errors.unexpectedError(e);
+            }
+
+            result = false;
+        }
+
+        return result;
     }
 
     async exec(
@@ -88,6 +109,10 @@ module.exports = class PeltonProject {
         }
     }
 
+    getConfigPath(...filenameParts) {
+        return pathLib.join(this.projectDir, '.pelton', ...filenameParts);
+    }
+
     async getEnv() {
         return envfile.parse(await this.getPeltonFileContents('env', ''));
     }
@@ -101,7 +126,7 @@ module.exports = class PeltonProject {
     }
 
     async getPeltonFileContents(filename, defaultContents) {
-        const fullFilename = pathLib.join(this.projectDir, '.pelton', filename);
+        const fullFilename = this.getConfigPath(filename);
 
         let contents;
         try {

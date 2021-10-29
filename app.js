@@ -10,6 +10,7 @@ Promise.resolve(yargs(hideBin(process.argv))
     .command(require('./commands/env'))
     .command(require('./commands/reset'))
     .command(require('./commands/start'))
+    .command(require('./commands/stop'))
     .option('docker-sudo', {
         alias: 'S',
         description: 'Use `sudo` when executing docker commands.',

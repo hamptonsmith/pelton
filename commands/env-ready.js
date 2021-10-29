@@ -21,7 +21,7 @@ exports.handler = async (argv) => {
     }
     catch (e) {
         if (!(e instanceof errors.NoSuchFile)) {
-            throw new errors.unexpectedError(e);
+            throw errors.unexpectedError(e);
         }
 
         console.log(`No docker-compose.yaml environment file at ${e.path}.`);
@@ -49,15 +49,27 @@ exports.handler = async (argv) => {
         `);
     }
 
-    const nextDockerFile = new TemporaryFile();
-    await nextDockerFile.put(curDockerCompose);
+    const nextDockerCompose = new TemporaryFile();
+    await nextDockerCompose.put(curDockerCompose);
     await project.exec(`
         ${maybeSudo} docker-compose \
                 --project-name ${projectName} \
-                --file ${nextDockerFile.filename} \
+                --file ${nextDockerCompose.filename} \
                 up --detach
     `);
 
     peltonState.lastDockerCompose = curDockerCompose;
     await peltonState.commit();
+
+    if (await project.configFileExists('runtime-platform-Dockerfile')) {
+        const runtimeDockerfilePath =
+                project.getConfigPath('runtime-platform-Dockerfile');
+
+        await project.exec(`
+            ${maybeSudo} docker build \
+                    --file ${runtimeDockerfilePath} \
+                    --tag pelton-${projectName}-runtime \
+                    .
+        `);
+    }
 };
