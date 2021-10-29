@@ -5,12 +5,19 @@ const crypto = require('crypto');
 const envReady = require('./env-ready');
 const errors = require('../standard-errors');
 const getFreePort = require('get-port');
+const pathLib = require('path');
 const PeltonProject = require('../utils/pelton-project');
 const TemporaryFile = require('../utils/temporary-file');
 
 exports.command = 'start';
 exports.describe = 'Bring service into a running state.'
 exports.builder = {
+    detach: {
+        alias: 'd',
+        type: 'boolean',
+        default: false,
+        describe: 'Run in detached mode.'
+    },
     isolationKey: {
         alias: 'k',
         describe: 'Key used to isolate the environment.',
@@ -33,7 +40,11 @@ exports.handler = async (argv) => {
     const project = new PeltonProject(argv.projectDir);
 
     await envReady.handler(argv);
-    const { DEFAULT_PORT } = await project.getManifest();
+    const {
+        DEFAULT_PORT,
+        PROJECT_NAME: projectName,
+        RUNTIME_PLATFORM: explicitRuntimePlatform
+    } = await project.getManifest();
 
     let port = argv.port === 'manifest.DEFAULT_PORT' ?
             (DEFAULT_PORT || 0) : argv.port;
@@ -59,20 +70,45 @@ exports.handler = async (argv) => {
         env.PELTON_DOCKER_SUDO = '--docker-sudo';
     }
 
+    const ttyOpts =
+            (process.stdin.isTTY ? 'i' : '')
+            + (process.stdout.isTTY ? 't' : '');
+
+    const maybeSudo = argv.dockerSudo ? ['sudo', '-E'] : [];
+    const maybeTty = ttyOpts !== '' ? [`-${ttyOpts}`] : [];
+    const maybeDetach = argv.detach ? ['-d'] : [];
+
+    const runtimePlatform = explicitRuntimePlatform ||
+            (await project.configFileExists('runtime-platform-Dockerfile'))
+            ? `pelton-${projectName}-runtime`
+            : 'ubuntu:latest';
+
+    const projectRootAbs = pathLib.resolve(argv.projectDir);
+
+    const authSockDir = pathLib.dirname(process.env.SSH_AUTH_SOCK);
+
     try {
-        await project.exec(`./.pelton/hermetic-start "${argv.reason}"`, {
+        await project.exec([
+            ...maybeSudo, 'docker', 'run', ...maybeTty, '--rm', '--init',
+                    ...maybeDetach,
+                    '--env-file', project.getConfigPath('env'),
+                    '--volume', `${authSockDir}:${authSockDir}`,
+                    '-e', `SSH_AUTH_SOCK=${process.env.SSH_AUTH_SOCK}`,
+                    '--volume', '/var/run/docker.sock:/var/run/docker.sock',
+                    '--volume', `${projectRootAbs}:/projectRoot`,
+                    '--volume', '/tmp:/tmp',
+                    '-e', `ISOLATION_KEY=${env.ISOLATION_KEY}`,
+                    '--name', `pelton_${projectName.replace(/_/g, '-_')}_${env.ISOLATION_KEY}`,
+                    '--workdir', '/projectRoot',
+                    '--entrypoint', '/projectRoot/.pelton/hermetic-start',
+                    runtimePlatform
+        ], {
             env,
             stdio: 'inherit'
         });
     }
     catch (e) {
-        if (!(e instanceof errors.SpawnedProcessError)
-                || e.cause.code !== 'ENOENT') {
-            throw errors.unexpectedError(e);
-        }
-
-        throw errors.incompatibleProject(
-                'No `hermetic-start` binary in <project root>/.pelton.');
+        throw errors.unexpectedError(e);
     }
 };
 
