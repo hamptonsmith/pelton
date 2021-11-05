@@ -4,6 +4,7 @@ const bs58 = require('bs58');
 const crypto = require('crypto');
 const envReady = require('./env-ready');
 const errors = require('../standard-errors');
+const expandenv = require('expandenv');
 const getFreePort = require('get-port');
 const pathLib = require('path');
 const PeltonProject = require('../utils/pelton-project');
@@ -87,11 +88,21 @@ exports.handler = async (argv) => {
 
     const authSockDir = pathLib.dirname(process.env.SSH_AUTH_SOCK);
 
+    // Using this rather than docker's built-in --env-file so we can take the
+    // opportunity to expand environment variables.
+    const envOpts = [];
+    const envFile = await project.getEnv();
+    for (const [key, value] of Object.entries(envFile)) {
+        envOpts.push('-e');
+        envOpts.push(`${key}=${expandenv(value)}`);
+    }
+
     try {
         await project.exec([
             ...maybeSudo, 'docker', 'run', ...maybeTty, '--rm', '--init',
                     ...maybeDetach,
-                    '--env-file', project.getConfigPath('env'),
+                    ...envOpts,
+                    '-e', `PORT=${port}`,
                     '--volume', `${authSockDir}:${authSockDir}`,
                     '-e', `SSH_AUTH_SOCK=${process.env.SSH_AUTH_SOCK}`,
                     '--volume', '/var/run/docker.sock:/var/run/docker.sock',
