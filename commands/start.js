@@ -77,7 +77,7 @@ exports.handler = async (argv) => {
 
     const maybeSudo = argv.dockerSudo ? ['sudo', '-E'] : [];
     const maybeTty = ttyOpts !== '' ? [`-${ttyOpts}`] : [];
-    const maybeDetach = argv.detach ? ['-d'] : [];
+    const maybeDetach = argv.detach ? ['-e' 'PELTON_DETACH=--detach'] : [];
 
     const runtimePlatform = explicitRuntimePlatform ||
             (await project.configFileExists('runtime-platform-Dockerfile'))
@@ -100,8 +100,8 @@ exports.handler = async (argv) => {
     try {
         await project.exec([
             ...maybeSudo, 'docker', 'run', ...maybeTty, '--rm', '--init',
-                    ...maybeDetach,
                     ...envOpts,
+                    ...maybeDetach,
                     '-e', `PORT=${port}`,
                     '--volume', `${authSockDir}:${authSockDir}`,
                     '-e', `SSH_AUTH_SOCK=${process.env.SSH_AUTH_SOCK}`,
