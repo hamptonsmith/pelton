@@ -77,7 +77,7 @@ exports.handler = async (argv) => {
 
     const maybeSudo = argv.dockerSudo ? ['sudo', '-E'] : [];
     const maybeTty = ttyOpts !== '' ? [`-${ttyOpts}`] : [];
-    const maybeDetach = argv.detach ? ['-e' 'PELTON_DETACH=--detach'] : [];
+    const maybeDetach = argv.detach ? ['-d'] : [];
 
     const runtimePlatform = explicitRuntimePlatform ||
             (await project.configFileExists('runtime-platform-Dockerfile'))
@@ -98,10 +98,31 @@ exports.handler = async (argv) => {
     }
 
     try {
+        if (await project.configFileExists('hermetic-start-prepare')) {
+            await project.exec([
+                ...maybeSudo, 'docker', 'run', ...maybeTty, '--rm', '--init',
+                        ...envOpts,
+                        '-e', `PORT=${port}`,
+                        '--volume', `${authSockDir}:${authSockDir}`,
+                        '-e', `SSH_AUTH_SOCK=${process.env.SSH_AUTH_SOCK}`,
+                        '--volume', '/var/run/docker.sock:/var/run/docker.sock',
+                        '--volume', `${projectRootAbs}:/projectRoot`,
+                        '--volume', '/tmp:/tmp',
+                        '-e', `ISOLATION_KEY=${env.ISOLATION_KEY}`,
+                        '--name', `pelton_${projectName.replace(/_/g, '-_')}_${env.ISOLATION_KEY}`,
+                        '--workdir', '/projectRoot',
+                        '--entrypoint', '/projectRoot/.pelton/hermetic-prepare',
+                        runtimePlatform
+            ], {
+                env,
+                stdio: 'inherit'
+            });
+        }
+
         await project.exec([
             ...maybeSudo, 'docker', 'run', ...maybeTty, '--rm', '--init',
-                    ...envOpts,
                     ...maybeDetach,
+                    ...envOpts,
                     '-e', `PORT=${port}`,
                     '--volume', `${authSockDir}:${authSockDir}`,
                     '-e', `SSH_AUTH_SOCK=${process.env.SSH_AUTH_SOCK}`,
