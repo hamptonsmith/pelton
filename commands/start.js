@@ -111,7 +111,7 @@ exports.handler = async (argv) => {
                         '-e', `ISOLATION_KEY=${env.ISOLATION_KEY}`,
                         '--name', `pelton_${projectName.replace(/_/g, '-_')}_${env.ISOLATION_KEY}`,
                         '--workdir', '/projectRoot',
-                        '--entrypoint', '/projectRoot/.pelton/hermetic-prepare',
+                        '--entrypoint', '/projectRoot/.pelton/hermetic-start-prepare',
                         runtimePlatform
             ], {
                 env,
